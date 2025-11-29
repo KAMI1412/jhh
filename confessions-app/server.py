@@ -16,7 +16,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.path = '/index.html'
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
-os.chdir('/Users/mac/Documents/confessions-app')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 with socketserver.TCPServer(("", PORT), MyHTTPRequestHandler) as httpd:
     print(f"✓ Server running at http://localhost:{PORT}")
