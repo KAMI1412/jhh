@@ -1,6 +1,10 @@
 {
     "rewrites": [
         {
+            "source": "/.well-known/farcaster.json",
+            "destination": "/confessions-app/farcaster.json"
+        },
+        {
             "source": "/",
             "destination": "/confessions-app/index.html"
         },
