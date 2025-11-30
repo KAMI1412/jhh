@@ -1,8 +1,14 @@
+```json
 {
     "rewrites": [
+        {
+            "source": "/",
+            "destination": "/confessions-app/index.html"
+        },
         {
             "source": "/(.*)",
             "destination": "/confessions-app/$1"
         }
     ]
 }
+```
