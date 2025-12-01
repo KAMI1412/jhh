@@ -493,28 +493,12 @@
                         console.error('Payment failed:', paymentError);
                         hideLoading();
 
-                        // Check if it's an insufficient balance error
-                        if (paymentError.message &&
-                            (paymentError.message.includes('insufficient') ||
-                                paymentError.message.includes('exceeds balance') ||
-                                paymentError.message.includes('ERC20'))) {
-
-                            // Fallback to Grace points
-                            if (grace < 20) {
-                                showMessage('Not enough USDC or Grace! You need 20 Grace or 0.10 USDC.', 'error');
-                                return;
-                            }
-
-                            grace -= 20;
-                            paymentSuccessful = true;
-                            await showMessage('⚠️ Paid with Grace (insufficient USDC balance)', 'warning');
-                        } else if (paymentError.message && paymentError.message.includes('User denied')) {
+                        if (paymentError.message && paymentError.message.includes('User denied')) {
                             showMessage('Payment cancelled by user', 'error');
-                            return;
                         } else {
                             showMessage('Payment failed: ' + (paymentError.message || 'Unknown error'), 'error');
-                            return;
                         }
+                        return;
                     }
                 } else {
                     // Fallback: Use Grace points if payment not available
@@ -710,62 +694,30 @@
                     const transferData = encodeTransfer(recipientAddress, commentPayment);
 
                     const tx = await provider.request({
-                        method: 'eth_sendTransaction',
-                        params: [{
-                            from: userAddress,
-                            to: usdcAddress,
-                            value: '0x0',
-                            data: transferData,
-                            chainId: baseChainId
-                        }]
-                    });
-
-                    if (!tx) {
-                        hideLoading();
-                        showMessage('Payment cancelled', 'error');
-                        return;
-                    }
-
-                    hideLoading();
-                } catch (paymentError) {
-                    console.error('Payment failed:', paymentError);
-                    hideLoading();
-
-                    // Check if it's an insufficient balance error
-                    if (paymentError.message &&
-                        (paymentError.message.includes('insufficient') ||
-                            paymentError.message.includes('exceeds balance') ||
-                            paymentError.message.includes('ERC20'))) {
-
-                        // Fallback: post comment without payment
-                        await showMessage('⚠️ Insufficient USDC - posting judgment for free', 'warning');
-                    } else if (paymentError.message && paymentError.message.includes('User denied')) {
-                        showMessage('Payment cancelled. Judgment not posted.', 'error');
-                        return;
                     } else {
                         showMessage('Payment failed: ' + (paymentError.message || 'Unknown error'), 'error');
-                        return;
-                    }
                 }
+                    return;
             }
+        }
 
             // Add comment to the deed
             if (!deed.comments) deed.comments = [];
-            deed.comments.push({
-                text: comment,
-                judgment: 'neutral',
-                timestamp: Date.now()
-            });
+        deed.comments.push({
+            text: comment,
+            judgment: 'neutral',
+            timestamp: Date.now()
+        });
 
-            saveData();
+        saveData();
 
-            await showMessage('💬 Judgment posted! (0.20 USDC paid)', 'success');
+        await showMessage('💬 Judgment posted! (0.20 USDC paid)', 'success');
 
-            commentInput.value = '';
-            commentCharCounter.textContent = '0';
-            submitJudgmentBtn.style.display = 'none';
+        commentInput.value = '';
+        commentCharCounter.textContent = '0';
+        submitJudgmentBtn.style.display = 'none';
 
-            loadNextDeed();
+        loadNextDeed();
         });
 
         // Load next deed
