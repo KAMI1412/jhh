@@ -925,7 +925,9 @@
 
         function saveData() {
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(deeds));
+                // Keep only the latest 50 deeds to prevent performance issues
+                const deedsToSave = deeds.slice(0, 50);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(deedsToSave));
                 localStorage.setItem(STATS_KEY, JSON.stringify({
                     grace,
                     faith,
