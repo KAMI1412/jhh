@@ -493,12 +493,28 @@
                         console.error('Payment failed:', paymentError);
                         hideLoading();
 
-                        if (paymentError.message && paymentError.message.includes('User denied')) {
+                        // Check if it's an insufficient balance error
+                        if (paymentError.message &&
+                            (paymentError.message.includes('insufficient') ||
+                                paymentError.message.includes('exceeds balance') ||
+                                paymentError.message.includes('ERC20'))) {
+
+                            // Fallback to Grace points
+                            if (grace < 20) {
+                                showMessage('Not enough USDC or Grace! You need 20 Grace or 0.10 USDC.', 'error');
+                                return;
+                            }
+
+                            grace -= 20;
+                            paymentSuccessful = true;
+                            await showMessage('⚠️ Paid with Grace (insufficient USDC balance)', 'warning');
+                        } else if (paymentError.message && paymentError.message.includes('User denied')) {
                             showMessage('Payment cancelled by user', 'error');
+                            return;
                         } else {
                             showMessage('Payment failed: ' + (paymentError.message || 'Unknown error'), 'error');
+                            return;
                         }
-                        return;
                     }
                 } else {
                     // Fallback: Use Grace points if payment not available
@@ -715,12 +731,21 @@
                     console.error('Payment failed:', paymentError);
                     hideLoading();
 
-                    if (paymentError.message && paymentError.message.includes('User denied')) {
+                    // Check if it's an insufficient balance error
+                    if (paymentError.message &&
+                        (paymentError.message.includes('insufficient') ||
+                            paymentError.message.includes('exceeds balance') ||
+                            paymentError.message.includes('ERC20'))) {
+
+                        // Fallback: post comment without payment
+                        await showMessage('⚠️ Insufficient USDC - posting judgment for free', 'warning');
+                    } else if (paymentError.message && paymentError.message.includes('User denied')) {
                         showMessage('Payment cancelled. Judgment not posted.', 'error');
+                        return;
                     } else {
                         showMessage('Payment failed: ' + (paymentError.message || 'Unknown error'), 'error');
+                        return;
                     }
-                    return;
                 }
             }
 
