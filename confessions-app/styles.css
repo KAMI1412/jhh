@@ -694,6 +694,35 @@ h1 {
     margin-top: 5px;
 }
 
+.submit-judgment-btn {
+    width: 100%;
+    padding: 14px 28px;
+    background: linear-gradient(180deg, #4A3319 0%, #2D1F10 100%);
+    color: #C9A050;
+    border: 1px solid rgba(101, 67, 33, 0.5);
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(101, 67, 33, 0.3);
+    font-family: 'Georgia', serif;
+    letter-spacing: 0.5px;
+    margin-top: 12px;
+}
+
+.submit-judgment-btn:hover {
+    background: linear-gradient(180deg, #5A4329 0%, #3D2F20 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(101, 67, 33, 0.4);
+    transform: translateY(-1px);
+}
+
+.submit-judgment-btn:active {
+    transform: translateY(0);
+}
+
 .comments-list::-webkit-scrollbar {
     width: 6px;
 }
