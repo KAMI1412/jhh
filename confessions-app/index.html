@@ -191,6 +191,7 @@
         const USERNAME_KEY = 'confessional_username';
         let sdk = null;
         let anonymousUsername = null;
+        let currentlyDisplayedDeed = null; // Track the deed currently being shown
 
         // DOM elements
         const confessionInput = document.getElementById('confession-input');
@@ -543,9 +544,9 @@
 
         // Bless button with comment
         blessBtn.addEventListener('click', async () => {
-            if (currentDeedIndex >= deeds.length) return;
+            if (!currentlyDisplayedDeed) return;
 
-            const deed = deeds[currentDeedIndex];
+            const deed = currentlyDisplayedDeed;
             const comment = commentInput.value.trim();
 
             // If comment exists, require payment (unless user is "jesus")
@@ -674,9 +675,9 @@
 
         // Block button with comment
         blockBtn.addEventListener('click', async () => {
-            if (currentDeedIndex >= deeds.length) return;
+            if (!currentlyDisplayedDeed) return;
 
-            const deed = deeds[currentDeedIndex];
+            const deed = currentlyDisplayedDeed;
             const comment = commentInput.value.trim();
 
             // If comment exists, require payment (unless user is "jesus")
@@ -846,6 +847,7 @@
             if (currentDeedIndex < 0) currentDeedIndex = deeds.length - 1;
 
             const deed = deeds[currentDeedIndex];
+            currentlyDisplayedDeed = deed; // Store reference to displayed deed
 
             deedText.textContent = deed.text;
             deedId.textContent = '#' + deed.id;
