@@ -59,7 +59,10 @@
                 <div class="deed-card" id="deed-card">
                     <div class="deed-header">
                         <span class="deed-type" id="deed-type">Confession</span>
-                        <span class="deed-id" id="current-deed-id">#XXXXX</span>
+                        <div class="deed-meta">
+                            <span class="deed-user" id="deed-user">Anonymous</span>
+                            <span class="deed-id" id="current-deed-id">#XXXXX</span>
+                        </div>
                     </div>
                     <p class="deed-text" id="deed-text">Loading...</p>
                     <div class="deed-stats">
@@ -102,7 +105,10 @@
                         <span class="btn-cost">-5 Grace</span>
                     </button>
                 </div>
-                <button class="skip-btn" id="skip-btn">Pass Judgment Later</button>
+                <div class="navigation-controls">
+                    <button class="nav-btn" id="prev-btn">← Previous</button>
+                    <button class="skip-btn" id="skip-btn">Next →</button>
+                </div>
             </div>
         </div>
 
@@ -203,6 +209,8 @@
         const blessBtn = document.getElementById('bless-btn');
         const blockBtn = document.getElementById('block-btn');
         const skipBtn = document.getElementById('skip-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const deedUser = document.getElementById('deed-user');
         const commentInput = document.getElementById('comment-input');
         const commentCharCounter = document.getElementById('comment-char-counter');
         const commentsList = document.getElementById('comments-list');
@@ -498,7 +506,8 @@
                         blessCount: 0,
                         blockCount: 0,
                         type: 'Confession',
-                        paid: walletConnected
+                        paid: walletConnected,
+                        username: anonymousUsername || 'Anonymous'
                     };
 
                     deeds.unshift(deed);
@@ -796,10 +805,17 @@
             loadNextDeed();
         });
 
-        // Skip button
+        // Initial load
+        loadNextDeed();
+
+        // Navigation buttons
         skipBtn.addEventListener('click', () => {
-            commentInput.value = '';
-            commentCharCounter.textContent = '0';
+            currentDeedIndex++;
+            loadNextDeed();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            currentDeedIndex--;
             loadNextDeed();
         });
 
@@ -825,7 +841,10 @@
             blessBtn.style.opacity = '1';
             blockBtn.style.opacity = '1';
 
-            currentDeedIndex = currentDeedIndex % deeds.length;
+            // Handle index wrapping
+            if (currentDeedIndex >= deeds.length) currentDeedIndex = 0;
+            if (currentDeedIndex < 0) currentDeedIndex = deeds.length - 1;
+
             const deed = deeds[currentDeedIndex];
 
             deedText.textContent = deed.text;
@@ -833,6 +852,10 @@
             deedType.textContent = deed.type || 'Confession';
             deedBlessCount.textContent = deed.blessCount || 0;
             deedBlockCount.textContent = deed.blockCount || 0;
+
+            if (deedUser) {
+                deedUser.textContent = deed.username || 'Anonymous';
+            }
 
             // Render comments
             renderComments(deed.comments || []);
