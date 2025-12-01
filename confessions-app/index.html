@@ -601,6 +601,126 @@
             loadNextDeed();
         });
 
+        // Submit Judgment button (paid comment)
+        submitJudgmentBtn.addEventListener('click', async () => {
+            if (!currentlyDisplayedDeed) return;
+
+            const deed = currentlyDisplayedDeed;
+            const comment = commentInput.value.trim();
+
+            if (!comment) {
+                showMessage('Please write a judgment first', 'error');
+                return;
+            }
+
+            const isJesus = farcasterUsername === 'jesus';
+
+            if (!isJesus) {
+                // Non-jesus users must pay
+                if (!walletConnected && sdk && sdk.wallet) {
+                    try {
+                        const wallet = await sdk.wallet.ethProvider;
+                        if (wallet) {
+                            const accounts = await wallet.request({ method: 'eth_accounts' });
+                            if (accounts && accounts.length > 0) {
+                                walletConnected = true;
+                                userAddress = accounts[0];
+                            } else {
+                                showMessage('Wallet required for judgments. Please connect in Farcaster.', 'error');
+                                return;
+                            }
+                        }
+                    } catch (error) {
+                        showMessage('Wallet connection required for judgments', 'error');
+                        return;
+                    }
+                }
+
+                // Process payment for judgment
+                try {
+                    showLoading();
+
+                    const provider = await sdk.wallet.ethProvider;
+                    if (!provider) {
+                        throw new Error('Wallet provider not available');
+                    }
+
+                    const chainId = await provider.request({ method: 'eth_chainId' });
+                    const baseChainId = '0x2105';
+
+                    if (chainId !== baseChainId) {
+                        try {
+                            await provider.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: baseChainId }],
+                            });
+                        } catch (switchError) {
+                            if (switchError.code === 4902) {
+                                showMessage('Please add Base network to your wallet', 'error');
+                            } else {
+                                showMessage('Please switch to Base network in your wallet', 'error');
+                            }
+                            hideLoading();
+                            return;
+                        }
+                    }
+
+                    const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+                    const recipientAddress = '0x4d68BF377995c478bb8D3bB1eDE71502c7E55E94';
+                    const commentPayment = '200000'; // 0.20 USDC
+
+                    const transferData = encodeTransfer(recipientAddress, commentPayment);
+
+                    const tx = await provider.request({
+                        method: 'eth_sendTransaction',
+                        params: [{
+                            from: userAddress,
+                            to: usdcAddress,
+                            value: '0x0',
+                            data: transferData,
+                            chainId: baseChainId
+                        }]
+                    });
+
+                    if (!tx) {
+                        hideLoading();
+                        showMessage('Payment cancelled', 'error');
+                        return;
+                    }
+
+                    hideLoading();
+                } catch (paymentError) {
+                    console.error('Payment failed:', paymentError);
+                    hideLoading();
+
+                    if (paymentError.message && paymentError.message.includes('User denied')) {
+                        showMessage('Payment cancelled. Judgment not posted.', 'error');
+                    } else {
+                        showMessage('Payment failed: ' + (paymentError.message || 'Unknown error'), 'error');
+                    }
+                    return;
+                }
+            }
+
+            // Add comment to the deed
+            if (!deed.comments) deed.comments = [];
+            deed.comments.push({
+                text: comment,
+                judgment: 'neutral',
+                timestamp: Date.now()
+            });
+
+            saveData();
+
+            await showMessage('💬 Judgment posted! (0.20 USDC paid)', 'success');
+
+            commentInput.value = '';
+            commentCharCounter.textContent = '0';
+            submitJudgmentBtn.style.display = 'none';
+
+            loadNextDeed();
+        });
+
         // Load next deed
         function loadNextDeed() {
             if (deeds.length === 0) {
