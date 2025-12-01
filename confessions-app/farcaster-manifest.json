@@ -1,15 +1,15 @@
 {
   "accountAssociation": {
     "header": "eyJmaWQiOjMxNTMsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhlMDJFZURBMTcxOTc5Mzg4ZDc2ZjM0NDc2NzgyNTk1ODY0ODVBMTEzIn0",
-    "payload": "eyJkb21haW4iOiJmYXJjYXN0ZXItbmVvbi52ZXJjZWwuYXBwIn0=",
+    "payload": "eyJkb21haW4iOiJtaW5pYXBwcC1waS52ZXJjZWwuYXBwIn0=",
     "signature": ""
   },
   "frame": {
     "version": "1",
     "name": "Confessional",
-    "iconUrl": "https://farcaster-neon.vercel.app/icon.png",
-    "homeUrl": "https://farcaster-neon.vercel.app",
-    "splashImageUrl": "https://farcaster-neon.vercel.app/splash.png",
+    "iconUrl": "https://miniappp-pi.vercel.app/icon.png",
+    "homeUrl": "https://miniappp-pi.vercel.app",
+    "splashImageUrl": "https://miniappp-pi.vercel.app/splash.png",
     "splashBackgroundColor": "#2D1B1B"
   }
 }
