@@ -694,30 +694,53 @@
                     const transferData = encodeTransfer(recipientAddress, commentPayment);
 
                     const tx = await provider.request({
+                        method: 'eth_sendTransaction',
+                        params: [{
+                            from: userAddress,
+                            to: usdcAddress,
+                            value: '0x0',
+                            data: transferData,
+                            chainId: baseChainId
+                        }]
+                    });
+
+                    if (!tx) {
+                        hideLoading();
+                        showMessage('Payment cancelled', 'error');
+                        return;
+                    }
+
+                    hideLoading();
+                } catch (paymentError) {
+                    console.error('Payment failed:', paymentError);
+                    hideLoading();
+
+                    if (paymentError.message && paymentError.message.includes('User denied')) {
+                        showMessage('Payment cancelled. Judgment not posted.', 'error');
                     } else {
                         showMessage('Payment failed: ' + (paymentError.message || 'Unknown error'), 'error');
-                }
+                    }
                     return;
+                }
             }
-        }
 
             // Add comment to the deed
             if (!deed.comments) deed.comments = [];
-        deed.comments.push({
-            text: comment,
-            judgment: 'neutral',
-            timestamp: Date.now()
-        });
+            deed.comments.push({
+                text: comment,
+                judgment: 'neutral',
+                timestamp: Date.now()
+            });
 
-        saveData();
+            saveData();
 
-        await showMessage('💬 Judgment posted! (0.20 USDC paid)', 'success');
+            await showMessage('💬 Judgment posted! (0.20 USDC paid)', 'success');
 
-        commentInput.value = '';
-        commentCharCounter.textContent = '0';
-        submitJudgmentBtn.style.display = 'none';
+            commentInput.value = '';
+            commentCharCounter.textContent = '0';
+            submitJudgmentBtn.style.display = 'none';
 
-        loadNextDeed();
+            loadNextDeed();
         });
 
         // Load next deed
