@@ -285,7 +285,7 @@
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 tabContents.forEach(content => content.classList.remove('active'));
-                document.getElementById(`${tabName} -tab`).classList.add('active');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
 
                 if (tabName === 'judge') {
                     loadNextDeed();
@@ -803,7 +803,7 @@
             }
 
             commentsList.innerHTML = comments.map(comment => `
-                                < div class="comment-item ${comment.judgment}" >
+                <div class="comment-item ${comment.judgment}">
                     <div class="comment-header">
                         <span class="comment-judgment ${comment.judgment}">
                             ${comment.judgment === 'blessed' ? '🙏 Blessed' : '👎 Blocked'}
@@ -811,8 +811,8 @@
                         <span class="comment-time">${formatTime(comment.timestamp)}</span>
                     </div>
                     <div class="comment-text">${escapeHtml(comment.text)}</div>
-                </div >
-                                `).join('');
+                </div>
+            `).join('');
         }
 
         // Format time helper
@@ -890,15 +890,15 @@
                 const rankClass = actualRank === 1 ? 'first' : actualRank === 2 ? 'second' : actualRank === 3 ? 'third' : '';
                 const youClass = entry.isYou ? 'style="background: rgba(212, 175, 55, 0.1); border-color: rgba(212, 175, 55, 0.4);"' : '';
                 return `
-                                < div class="lb-entry" ${youClass}>
+                    <div class="lb-entry" ${youClass}>
                         <div class="lb-rank ${rankClass}">#${actualRank}</div>
                         <div class="lb-info">
                             <div class="lb-name">${entry.name}${entry.isYou ? ' 🎯' : ''}</div>
                             <div class="lb-title">${entry.title}</div>
                         </div>
                         <div class="lb-score">${entry.score}</div>
-                    </div >
-                                `;
+                    </div>
+                `;
             }).join('');
         }
 
