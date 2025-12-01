@@ -190,10 +190,12 @@
 
         const STORAGE_KEY = 'bless_or_block_deeds';
         const STATS_KEY = 'bless_or_block_stats';
+        const JUDGED_DEEDS_KEY = 'confessional_judged_deeds';
         const USERNAME_KEY = 'confessional_username';
         let sdk = null;
         let anonymousUsername = null;
         let currentlyDisplayedDeed = null; // Track the deed currently being shown
+        let judgedDeeds = new Set(); // Track which deeds this user has judged
 
         // DOM elements
         const confessionInput = document.getElementById('confession-input');
@@ -558,10 +560,20 @@
 
             const deed = currentlyDisplayedDeed;
 
+            // Check if already judged
+            if (judgedDeeds.has(deed.id)) {
+                showMessage('You have already judged this confession', 'error');
+                return;
+            }
+
             deed.blessCount++;
             grace -= 5;  // Lose grace when absolving
             faith += 2;
             userStats.blessed++;
+
+            // Mark as judged
+            judgedDeeds.add(deed.id);
+            localStorage.setItem(JUDGED_DEEDS_KEY, JSON.stringify([...judgedDeeds]));
 
             saveData();
             updateStats();
@@ -576,9 +588,19 @@
 
             const deed = currentlyDisplayedDeed;
 
+            // Check if already judged
+            if (judgedDeeds.has(deed.id)) {
+                showMessage('You have already judged this confession', 'error');
+                return;
+            }
+
             deed.blockCount++;
             grace += 15;  // Gain more grace when condemning
             userStats.blocked++;
+
+            // Mark as judged
+            judgedDeeds.add(deed.id);
+            localStorage.setItem(JUDGED_DEEDS_KEY, JSON.stringify([...judgedDeeds]));
 
             saveData();
             updateStats();
@@ -760,6 +782,19 @@
                 deedUser.textContent = deed.username || 'Anonymous';
             }
 
+            // Check if user has already judged this deed
+            if (judgedDeeds.has(deed.id)) {
+                blessBtn.disabled = true;
+                blockBtn.disabled = true;
+                blessBtn.style.opacity = '0.3';
+                blockBtn.style.opacity = '0.3';
+            } else {
+                blessBtn.disabled = false;
+                blockBtn.disabled = false;
+                blessBtn.style.opacity = '1';
+                blockBtn.style.opacity = '1';
+            }
+
             // Render comments
             renderComments(deed.comments || []);
 
@@ -883,6 +918,7 @@
             try {
                 const storedDeeds = localStorage.getItem(STORAGE_KEY);
                 const storedStats = localStorage.getItem(STATS_KEY);
+                const storedJudged = localStorage.getItem(JUDGED_DEEDS_KEY);
 
                 if (storedDeeds) {
                     deeds = JSON.parse(storedDeeds);
@@ -893,6 +929,10 @@
                     grace = stats.grace || 100;
                     faith = stats.faith || 0;
                     userStats = stats.userStats || { blessed: 0, blocked: 0, submitted: 0 };
+                }
+
+                if (storedJudged) {
+                    judgedDeeds = new Set(JSON.parse(storedJudged));
                 }
             } catch (error) {
                 console.error('Failed to load data:', error);
