@@ -166,6 +166,9 @@
     </div>
 
     <script type="module">
+        // Import Firebase
+        import { database, ref, push, set, onValue, update, get } from './firebase-config.js';
+
         // Import wallet dependencies
         let getWalletClient, configWagmi;
 
@@ -520,12 +523,15 @@
                         blockCount: 0,
                         type: 'Confession',
                         paid: walletConnected,
-                        username: anonymousUsername || 'Anonymous'
+                        username: anonymousUsername || 'Anonymous',
+                        comments: []
                     };
 
-                    deeds.unshift(deed);
+                    // Save to Firebase
+                    await saveDeed(deed);
+
                     userStats.submitted++;
-                    saveData();
+                    saveData(); // Save personal stats
                     updateStats();
 
                     confessionInput.value = '';
@@ -575,7 +581,12 @@
             judgedDeeds.add(deed.id);
             localStorage.setItem(JUDGED_DEEDS_KEY, JSON.stringify([...judgedDeeds]));
 
-            saveData();
+            // Update Firebase
+            await updateDeed(deed.id, {
+                blessCount: deed.blessCount
+            });
+
+            saveData(); // Save personal stats
             updateStats();
 
             await showMessage('🕊 Absolved! -5 Grace, +2 Faith', 'success');
@@ -602,7 +613,12 @@
             judgedDeeds.add(deed.id);
             localStorage.setItem(JUDGED_DEEDS_KEY, JSON.stringify([...judgedDeeds]));
 
-            saveData();
+            // Update Firebase
+            await updateDeed(deed.id, {
+                blockCount: deed.blockCount
+            });
+
+            saveData(); // Save personal stats
             updateStats();
 
             await showMessage('⚖ Condemned! +15 Grace, +1 Faith', 'warning');
@@ -732,7 +748,10 @@
                 timestamp: Date.now()
             });
 
-            saveData();
+            // Update Firebase with new comment
+            await updateDeed(deed.id, {
+                comments: deed.comments
+            });
 
             await showMessage('💬 Judgment posted! (0.20 USDC paid)', 'success');
 
@@ -908,16 +927,12 @@
             }).join('');
         }
 
-        // Data persistence
+        // Data persistence - Load from Firebase
         function loadData() {
             try {
-                const storedDeeds = localStorage.getItem(STORAGE_KEY);
+                // Load personal stats from localStorage (Grace, Faith, etc)
                 const storedStats = localStorage.getItem(STATS_KEY);
                 const storedJudged = localStorage.getItem(JUDGED_DEEDS_KEY);
-
-                if (storedDeeds) {
-                    deeds = JSON.parse(storedDeeds);
-                }
 
                 if (storedStats) {
                     const stats = JSON.parse(storedStats);
@@ -929,23 +944,64 @@
                 if (storedJudged) {
                     judgedDeeds = new Set(JSON.parse(storedJudged));
                 }
+
+                // Load confessions from Firebase with real-time sync
+                const confessionsRef = ref(database, 'confessions');
+                onValue(confessionsRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        // Convert Firebase object to array
+                        deeds = Object.values(data).sort((a, b) => b.timestamp - a.timestamp);
+                    } else {
+                        deeds = [];
+                    }
+
+                    // Update UI after loading
+                    if (currentDeedIndex === 0 && deeds.length > 0) {
+                        loadNextDeed();
+                    }
+                    updateStats();
+                });
             } catch (error) {
                 console.error('Failed to load data:', error);
             }
         }
 
-        function saveData() {
+        async function saveData() {
             try {
-                // Keep only the latest 50 deeds to prevent performance issues
-                const deedsToSave = deeds.slice(0, 50);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(deedsToSave));
+                // Save personal stats to localStorage
                 localStorage.setItem(STATS_KEY, JSON.stringify({
                     grace,
                     faith,
                     userStats
                 }));
+
+                // Confessions are automatically synced via Firebase real-time listeners
+                // No need to manually save - updates happen through saveDeed() function
             } catch (error) {
                 console.error('Failed to save data:', error);
+            }
+        }
+
+        // New function to save individual deed to Firebase
+        async function saveDeed(deed) {
+            try {
+                const confessionsRef = ref(database, `confessions/${deed.id}`);
+                await set(confessionsRef, deed);
+            } catch (error) {
+                console.error('Failed to save deed to Firebase:', error);
+                throw error;
+            }
+        }
+
+        // New function to update deed (for votes/comments)
+        async function updateDeed(deedId, updates) {
+            try {
+                const deedRef = ref(database, `confessions/${deedId}`);
+                await update(deedRef, updates);
+            } catch (error) {
+                console.error('Failed to update deed:', error);
+                throw error;
             }
         }
 
