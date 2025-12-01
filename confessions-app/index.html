@@ -815,6 +815,25 @@
                                 `).join('');
         }
 
+        // Format time helper
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+
+            // If less than 24 hours
+            if (diff < 24 * 60 * 60 * 1000) {
+                if (diff < 60 * 60 * 1000) {
+                    const minutes = Math.floor(diff / (60 * 1000));
+                    return `${minutes}m ago`;
+                }
+                const hours = Math.floor(diff / (60 * 60 * 1000));
+                return `${hours}h ago`;
+            }
+
+            return date.toLocaleDateString();
+        }
+
         // Escape HTML helper
         function escapeHtml(text) {
             const div = document.createElement('div');
@@ -934,14 +953,14 @@
                 message.style.cssText = `
                             position: fixed;
                             top: 20px;
-                            left: 50 %;
-                            transform: translateX(-50 %);
+                            left: 50%;
+                            transform: translateX(-50%);
                             background: ${colors[type]};
                             color: white;
                             padding: 15px 30px;
-                            border - radius: 10px;
-                            box - shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-                            z - index: 2000;
+                            border-radius: 10px;
+                            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                            z-index: 2000;
                             animation: slideDown 0.3s ease;
                             `;
                 message.textContent = text;
@@ -972,22 +991,22 @@
                             @keyframes slideDown {
                 from {
                                     opacity: 0;
-                                    transform: translateX(-50 %) translateY(-20px);
+                                    transform: translateX(-50%) translateY(-20px);
                                 }
                 to {
                                     opacity: 1;
-                                    transform: translateX(-50 %) translateY(0);
+                                    transform: translateX(-50%) translateY(0);
                                 }
                             }
 
                             @keyframes slideUp {
                 from {
                                     opacity: 1;
-                                    transform: translateX(-50 %) translateY(0);
+                                    transform: translateX(-50%) translateY(0);
                                 }
                 to {
                                     opacity: 0;
-                                    transform: translateX(-50 %) translateY(-20px);
+                                    transform: translateX(-50%) translateY(-20px);
                                 }
                             }
         `;
