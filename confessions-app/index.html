@@ -423,9 +423,21 @@
                         const baseChainId = '0x2105'; // 8453 in hex
 
                         if (chainId !== baseChainId) {
-                            showMessage('Please switch to Base network in your wallet', 'error');
-                            hideLoading();
-                            return;
+                            try {
+                                await provider.request({
+                                    method: 'wallet_switchEthereumChain',
+                                    params: [{ chainId: baseChainId }],
+                                });
+                            } catch (switchError) {
+                                // This error code indicates that the chain has not been added to MetaMask.
+                                if (switchError.code === 4902) {
+                                    showMessage('Please add Base network to your wallet', 'error');
+                                } else {
+                                    showMessage('Please switch to Base network in your wallet', 'error');
+                                }
+                                hideLoading();
+                                return;
+                            }
                         }
 
                         // USDC on Base: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
@@ -443,7 +455,8 @@
                                 from: userAddress,
                                 to: usdcAddress,
                                 value: '0x0',
-                                data: transferData
+                                data: transferData,
+                                chainId: baseChainId // Explicitly specify chainId
                             }]
                         });
 
@@ -556,13 +569,25 @@
                             throw new Error('Wallet provider not available');
                         }
 
+                        // Verify we're on Base network (chainId 8453)
                         const chainId = await provider.request({ method: 'eth_chainId' });
                         const baseChainId = '0x2105';
 
                         if (chainId !== baseChainId) {
-                            showMessage('Please switch to Base network', 'error');
-                            hideLoading();
-                            return;
+                            try {
+                                await provider.request({
+                                    method: 'wallet_switchEthereumChain',
+                                    params: [{ chainId: baseChainId }],
+                                });
+                            } catch (switchError) {
+                                if (switchError.code === 4902) {
+                                    showMessage('Please add Base network to your wallet', 'error');
+                                } else {
+                                    showMessage('Please switch to Base network in your wallet', 'error');
+                                }
+                                hideLoading();
+                                return;
+                            }
                         }
 
                         const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
@@ -577,7 +602,8 @@
                                 from: userAddress,
                                 to: usdcAddress,
                                 value: '0x0',
-                                data: transferData
+                                data: transferData,
+                                chainId: baseChainId
                             }]
                         });
 
@@ -674,13 +700,25 @@
                             throw new Error('Wallet provider not available');
                         }
 
+                        // Verify we're on Base network (chainId 8453)
                         const chainId = await provider.request({ method: 'eth_chainId' });
                         const baseChainId = '0x2105';
 
                         if (chainId !== baseChainId) {
-                            showMessage('Please switch to Base network', 'error');
-                            hideLoading();
-                            return;
+                            try {
+                                await provider.request({
+                                    method: 'wallet_switchEthereumChain',
+                                    params: [{ chainId: baseChainId }],
+                                });
+                            } catch (switchError) {
+                                if (switchError.code === 4902) {
+                                    showMessage('Please add Base network to your wallet', 'error');
+                                } else {
+                                    showMessage('Please switch to Base network in your wallet', 'error');
+                                }
+                                hideLoading();
+                                return;
+                            }
                         }
 
                         const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
@@ -695,7 +733,8 @@
                                 from: userAddress,
                                 to: usdcAddress,
                                 value: '0x0',
-                                data: transferData
+                                data: transferData,
+                                chainId: baseChainId
                             }]
                         });
 
