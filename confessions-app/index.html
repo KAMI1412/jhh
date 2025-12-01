@@ -84,6 +84,10 @@
                         <span id="comment-char-counter">0</span>/200
                         <span style="margin-left: 10px; color: #8B7355;">$0.20 USDC per judgment</span>
                     </div>
+                    <div
+                        style="text-align: center; font-size: 0.85em; color: #8B7355; margin-top: 8px; font-style: italic;">
+                        Select <strong>Condemn</strong> or <strong>Absolve</strong> below to submit your judgment
+                    </div>
                 </div>
 
                 <div class="judge-actions">
@@ -802,17 +806,24 @@
         // Load next deed
         function loadNextDeed() {
             if (deeds.length === 0) {
-                deedText.textContent = 'No deeds to judge yet. Submit a confession!';
-                deedId.textContent = '#NONE';
-                deedType.textContent = 'Empty';
+                deedText.innerHTML = '<div style="text-align: center">The confessional is empty.<br><br><span style="font-size: 0.8em; color: #8B7355">Be the first to confess your sins!</span></div>';
+                deedId.textContent = '#EMPTY';
+                deedType.textContent = 'Waiting';
                 deedBlessCount.textContent = '0';
                 deedBlockCount.textContent = '0';
                 commentsList.innerHTML = '';
                 commentCount.textContent = '0';
                 blessBtn.disabled = true;
                 blockBtn.disabled = true;
+                // Add visual style to disabled buttons
+                blessBtn.style.opacity = '0.3';
+                blockBtn.style.opacity = '0.3';
                 return;
             }
+
+            // Reset button styles
+            blessBtn.style.opacity = '1';
+            blockBtn.style.opacity = '1';
 
             currentDeedIndex = currentDeedIndex % deeds.length;
             const deed = deeds[currentDeedIndex];
