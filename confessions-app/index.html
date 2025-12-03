@@ -534,6 +534,7 @@
 
                     userStats.submitted++;
                     saveData(); // Save personal stats
+                    await saveUserStatsToFirebase(); // Sync to Firebase for leaderboard
                     updateStats();
 
                     confessionInput.value = '';
