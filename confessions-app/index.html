@@ -310,10 +310,16 @@
                 tabContents.forEach(content => content.classList.remove('active'));
                 document.getElementById(`${tabName}-tab`).classList.add('active');
 
+                // Show/hide navigation controls based on tab
+                const navControls = document.querySelector('.navigation-controls');
                 if (tabName === 'judge') {
+                    navControls.style.display = 'flex';
                     loadNextDeed();
-                } else if (tabName === 'leaderboard') {
-                    renderLeaderboard();
+                } else {
+                    navControls.style.display = 'none';
+                    if (tabName === 'leaderboard') {
+                        renderLeaderboard();
+                    }
                 }
             });
         });
